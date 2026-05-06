@@ -62,8 +62,8 @@
     来输出 eps 文件。
 
 
-[1]: https://ww2.mathworks.cn/help/matlab/ref/matlab.ui.figure.html
-[2]: https://ww2.mathworks.cn/matlabcentral/answers/173629-how-to-change-figure-size
-[3]: https://undocumentedmatlab.com/articles/axes-looseinset-property
-[4]: https://mirrors.ctan.org/macros/latex/contrib/IEEEtran/IEEEtran.cls
-[5]: https://medemanabu.net/latex/length-units/
+[^1]: https://ww2.mathworks.cn/help/matlab/ref/matlab.ui.figure.html
+[^2]: https://ww2.mathworks.cn/matlabcentral/answers/173629-how-to-change-figure-size
+[^3]: https://undocumentedmatlab.com/articles/axes-looseinset-property
+[^4]: https://mirrors.ctan.org/macros/latex/contrib/IEEEtran/IEEEtran.cls
+[^5]: https://medemanabu.net/latex/length-units/
