@@ -43,4 +43,6 @@ function formatFigure(widthPercent, heightRatio)
     set(lgd, 'FontSize', 8);
   end
 
+  fontname(gcf, "Times New Roman");
+
 end
