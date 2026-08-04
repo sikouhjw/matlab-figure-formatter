@@ -1,7 +1,7 @@
 function formatFigure(widthPercent, heightRatio)
 
   if nargin < 1 || isempty(widthPercent)
-    widthPercent = 80;
+    widthPercent = 100;
   end
   if nargin < 2 || isempty(heightRatio)
     heightRatio = 0.75;
@@ -44,7 +44,13 @@ function formatFigure(widthPercent, heightRatio)
   end
 
   if exist('fontname')
-    fontname(gcf, "Times New Roman");
+
+    if exist('C:/Windows/Fonts/SimSun-TNR.ttf', 'file')
+      fontname(gcf, "SimSun-TNR");
+    else
+      fontname(gcf, "Times New Roman");
+    end
+
   end
 
 end

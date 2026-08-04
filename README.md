@@ -33,11 +33,14 @@
     ```
     该命令产生如下行为
     - 将图片的宽度和高度分别设置为：`21*0.42175cm*widthPercent/100` 和 `宽度*heightRatio`；
-      - 如果不填参数，默认值分别为 `80(80%)` 和 `0.75`；
+      - 如果不填参数，默认值分别为 `100(100%)` 和 `0.75`；
     - 所有文本（含图例、横纵标签）设置为 `8pt`；
-      - `8pt` 为 IEEE 推荐单栏图常用字号。
+      - `8pt` 为 IEEE 推荐单栏图常用字号；
+    - 将所有文本（含图例、横纵标签）的中文字体设置为 `中易宋体`、英文字体设置为 `Times New Roman`。
+      - 如果未安装 `SimSun-TNR.ttf`，则只设置英文字体；
+      - 如果缺少 `fontname` 命令，则不执行该行为。
 
-1. 示例用法：
+2. 示例用法：
     ```matlab
     plot(x,y);
     xlabel('Iteration, \it t');hold on;
@@ -46,7 +49,7 @@
     formatFigure;
     ```
 
-1. 实现不同样式的输入参数集合：
+3. 实现不同样式的输入参数集合：
     - 双子图：
       - 肩并肩：`formatFigure(50,1)`；
       - 上并下：`formatFigure(100,0.5)`。
@@ -59,7 +62,16 @@
     ```matlab
     print(gcf, '-depsc', 'file.eps');
     ```
-    来输出 eps 文件。
+    或
+    ```matlab
+   exportgraphics(gcf, 'file.pdf', 'ContentType', 'vector', 'BackgroundColor','none');
+    ```
+    来输出 `.eps` 或 `.pdf` 文件。
+
+1. 当横纵坐标中应使用数学公式，而 `\it` 命令并不是真正的数学字体，同时 Matlab 无法在使用 `latex` 解释器的时候修改字体，则可以参考 `xlabel_Iteration_formatter` 命令：
+    - 该命令产生正常的文本及颜色为白的倾斜字母，例如：`'Iteration, {\color{white}\it t}'`；
+    - 可以通过命令获得 `xlabel` 的坐标，从而在对应位置叠加数学公式（`latex` 解释器）；
+    - 通过移动数学公式，将白色倾斜字母覆盖，从而实现“正常字体文字+数学字体公式”的效果。
 
 
 [^1]: https://ww2.mathworks.cn/help/matlab/ref/matlab.ui.figure.html
