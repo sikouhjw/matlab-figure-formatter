@@ -29,11 +29,14 @@
 
 1. 通过上述接口，给出一个适用于 IEEE 投稿的“格式刷”命令：
     ```matlab
-    formatFigure(widthPercent, heightRatio)
+    formatFigure(widthPercent, heightRatio, columnMode)
     ```
     该命令产生如下行为
-    - 将图片的宽度和高度分别设置为：`21*0.42175cm*widthPercent/100` 和 `宽度*heightRatio`；
-      - 如果不填参数，默认值分别为 `100(100%)` 和 `0.75`；
+    - 根据 `columnMode` 的输入（`"single"`/`"double"`）决定图片的参考宽度，分别对应单栏和双栏；
+      - 缺省是单栏 `"single"`；
+    - 将图片的宽度和高度分别设置为：`x*0.42175cm*widthPercent/100` 和 `宽度*heightRatio`；
+      - 其中 `x` 在单栏模式为 `21`，在双栏模式为 `43`；
+      - 如果不填参数，默认值分别为 `100` (100%) 和 `0.75`；
     - 所有文本（含图例、横纵标签）设置为 `8pt`；
       - `8pt` 为 IEEE 推荐单栏图常用字号；
     - 将所有文本（含图例、横纵标签）的中文字体设置为 `中易宋体`、英文字体设置为 `Times New Roman`。

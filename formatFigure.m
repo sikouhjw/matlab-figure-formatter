@@ -1,4 +1,4 @@
-function formatFigure(widthPercent, heightRatio)
+function formatFigure(widthPercent, heightRatio, columnMode)
 
   if nargin < 1 || isempty(widthPercent)
     widthPercent = 100;
@@ -6,14 +6,21 @@ function formatFigure(widthPercent, heightRatio)
   if nargin < 2 || isempty(heightRatio)
     heightRatio = 0.75;
   end
+  if nargin < 3 || isempty(columnMode)
+    columnMode = "single";
+  end
 
   fig = gcf;
   ax  = gca;
 
   box(ax, 'on');
 
-  % One-column width in centimeters
-  colWidth = 21 * 0.42175;
+  % Column width in centimeters
+  if strcmpi(columnMode, "double")
+    colWidth = 43 * 0.42175;
+  else
+    colWidth = 21 * 0.42175;
+  end
 
   % Figure size
   figWidth  = colWidth * widthPercent / 100;
