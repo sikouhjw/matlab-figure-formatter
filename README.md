@@ -1,85 +1,232 @@
-# MATLAB 版“格式刷”
+# MATLAB “Format Painter” for Publication-Quality Figures
 
-# 引言
-1. 在论文撰写时，图片的绘制是一个重要的环节，而绘制“尺寸合适”“字号合适”的图片往往是较为繁琐的，因此本文提供一套适用于 Matlab 图片的“代码控制”方法，也可称为“格式刷”。
+# Introduction
 
-# 困难与解决思路
+1. Figure preparation is an important part of academic paper writing. However, producing figures with appropriate dimensions and font sizes can be tedious. This project provides a code-based method for controlling the appearance of MATLAB figures, which can be regarded as a MATLAB “format painter” for publication-quality figures.
 
-1. 在绘制图片时，调制图片尺寸是较为困难的，尤其是适用鼠标控制窗口大小，具有不确定性，而Matlab 提供了一定的接口可以控制窗口大小[^1]，同时前人也进行了一定的摸索可以借鉴[^2]。
+# Motivation and Solution
 
-1. Matlab 相关接口如下：
-    - `Position(PaperPosition)` 接口：控制图片的宽高；
-      - `Position` 控制屏幕显示时的尺寸；
-      - `PaperPosition` 控制打印、导出时的尺寸。
-    - `Units(PaperUnits)` 接口：控制尺寸的单位，可以设置为常见的单位，如厘米（cm）；
-      - 同上。
-    - `LooseInset` 接口[^3]：控制图片本体与图片窗口边缘的距离；
-    - `FontSize` 接口：控制图片中所有文本的字号。
-      - `xlabel(ylabel)` 的文本字号需要通过 `set(get(ax,'xlabel'),FontSize',8);` 设置。
-      - 图例的字号通过 `legend('FontSize',8);` 设置。
+1. Manually adjusting figure dimensions is inconvenient, especially when resizing figure windows with a mouse, since the resulting dimensions are difficult to control precisely. MATLAB provides interfaces for explicitly controlling figure dimensions [^1], and several practical approaches have also been discussed by the MATLAB community [^2].
 
-# IEEE 格式适配
+1. The main MATLAB properties used in this project are:
 
-1. `IEEEtran.cls`[^4] 的 `\textwidth` 长度为 `43pc`，单栏的 `\linewidth` 为 `21pc`，因此图片应根据单双栏宽度去设置尺寸。
-    - `1pc=0.421751764217518cm`[^5]。因此单栏图片宽度不超过 `21*0.42175cm`，双栏图片宽度不超过 `43*0.42175cm`。
-    - 由于图片尺寸已设置，因此在 LaTeX 中直接插入图片 `\includegraphics{file.eps}` 即可；
-      - 避免在 LaTeX 中缩放导致字体不一致或线宽失真。
+   - `Position` (`PaperPosition`): controls the figure width and height.
+     - `Position` controls the figure size displayed on the screen.
+     - `PaperPosition` controls the figure size used for printing and exporting.
 
-# 代码执行
+   - `Units` (`PaperUnits`): specifies the units used for figure dimensions, such as centimeters (`cm`).
+     - `Units` corresponds to `Position`.
+     - `PaperUnits` corresponds to `PaperPosition`.
 
-1. 通过上述接口，给出一个适用于 IEEE 投稿的“格式刷”命令：
-    ```matlab
-    formatFigure(widthPercent, heightRatio, columnMode)
-    ```
-    该命令产生如下行为
-    - 根据 `columnMode` 的输入（`"single"`/`"double"`）决定图片的参考宽度，分别对应单栏和双栏；
-      - 缺省是单栏 `"single"`；
-    - 将图片的宽度和高度分别设置为：`x*0.42175cm*widthPercent/100` 和 `宽度*heightRatio`；
-      - 其中 `x` 在单栏模式为 `21`，在双栏模式为 `43`；
-      - 如果不填参数，默认值分别为 `100` (100%) 和 `0.75`；
-    - 所有文本（含图例、横纵标签）设置为 `8pt`；
-      - `8pt` 为 IEEE 推荐单栏图常用字号；
-    - 将所有文本（含图例、横纵标签）的中文字体设置为 `中易宋体`、英文字体设置为 `Times New Roman`。
-      - 如果未安装 `SimSun-TNR.ttf`，则只设置英文字体；
-      - 如果缺少 `fontname` 命令，则不执行该行为。
+   - `LooseInset` [^3]: controls the spacing between the axes and the figure boundary.
 
-2. 示例用法：
-    ```matlab
-    plot(x,y);
-    xlabel('Iteration, \it t');hold on;
-    ylabel('MSE [dB]');
-    legend('Location', 'northeast');
-    formatFigure;
-    ```
+   - `FontSize`: controls the font size of text objects in the figure.
+     - The font sizes of `xlabel` and `ylabel` can be explicitly set using
+       ```matlab
+       set(get(ax, 'xlabel'), 'FontSize', 8);
+       set(get(ax, 'ylabel'), 'FontSize', 8);
+       ```
+     - The legend font size can be set using
+       ```matlab
+       legend('FontSize', 8);
+       ```
 
-3. 实现不同样式的输入参数集合：
-    - 双子图：
-      - 肩并肩：`formatFigure(50,1)`；
-      - 上并下：`formatFigure(100,0.5)`。
-    - 三子图：
-      - 肩并肩：`formatFigure(100/3,3/2)`；
-      - 上并下：`formatFigure(100,1/3)`。
-    - `./Demonstration` 文件夹中还存在可执行的 matlab 代码与 latex 排版示例，可供参考。
+# IEEE Format Adaptation
 
-# 其它
-1. 当某些文本字号小于 `8pt` 时（在有限篇幅内调整），直接另存为 `eps` 文件会导致导出的文本为 `8pt` 而不是想要的字号，此时可以通过
-    ```matlab
-    print(gcf, '-depsc', 'file.eps');
-    ```
-    或
-    ```matlab
-   exportgraphics(gcf, 'file.pdf', 'ContentType', 'vector', 'BackgroundColor','none');
-    ```
-    来输出 `.eps` 或 `.pdf` 文件。
+1. According to `IEEEtran.cls` [^4], the document `\textwidth` is `43pc`, while the single-column `\linewidth` is `21pc`. Therefore, the figure dimensions should be determined according to whether the figure occupies a single column or both columns.
 
-1. 当横纵坐标中应使用数学公式，而 `\it` 命令并不是真正的数学字体，同时 Matlab 无法在使用 `latex` 解释器的时候修改字体，则可以参考 `xlabel_Iteration_formatter` 命令：
-    - 该命令产生正常的文本及颜色为白的倾斜字母，例如：`'Iteration, {\color{white}\it t}'`；
-    - 可以通过命令获得 `xlabel` 的坐标，从而在对应位置叠加数学公式（`latex` 解释器）；
-    - 通过移动数学公式，将白色倾斜字母覆盖，从而实现“正常字体文字+数学字体公式”的效果。
+   - Since
+     ```text
+     1pc = 0.421751764217518cm
+     ```
+     [^5], the maximum widths are approximately
+     ```text
+     Single column: 21 × 0.42175 cm
+     Double column: 43 × 0.42175 cm
+     ```
 
+   - Since the physical dimensions of the figure are already specified in MATLAB, the exported figure can be inserted directly in LaTeX using
+     ```latex
+     \includegraphics{file.eps}
+     ```
+     without additional scaling.
 
-[^1]: https://ww2.mathworks.cn/help/matlab/ref/matlab.ui.figure.html
-[^2]: https://ww2.mathworks.cn/matlabcentral/answers/173629-how-to-change-figure-size
-[^3]: https://undocumentedmatlab.com/articles/axes-looseinset-property
-[^4]: https://mirrors.ctan.org/macros/latex/contrib/IEEEtran/IEEEtran.cls
-[^5]: https://medemanabu.net/latex/length-units/
+   - Avoiding unnecessary scaling in LaTeX helps maintain consistent font sizes and line widths across figures.
+
+# Installation
+
+1. Download or clone this repository:
+
+   ```bash
+   git clone https://github.com/sikouhjw/matlab-figure-formatter.git
+   ```
+
+2. Add the repository directory to the MATLAB search path. This can be done temporarily using
+
+   ```matlab
+   addpath('path/to/repository');
+   ```
+
+   or permanently using
+
+   ```matlab
+   addpath('path/to/repository');
+   savepath;
+   ```
+
+   Alternatively, the repository directory can be added through MATLAB:
+
+   ```text
+   Home → Set Path → Add Folder
+   ```
+
+3. After the directory has been added to the MATLAB path, `formatFigure` can be called directly from any MATLAB script:
+
+   ```matlab
+   formatFigure;
+   ```
+
+4. The optional `SimSun-TNR.ttf` font is used to support mixed Chinese and English text, with SimSun for Chinese characters and Times New Roman for English characters.
+
+   - On Windows, the function checks whether the following font file exists:
+
+     ```text
+     C:/Windows/Fonts/SimSun-TNR.ttf
+     ```
+
+   - If the font is unavailable, Times New Roman is used instead.
+
+   - The font configuration does not affect the basic figure-sizing functionality.
+
+# Usage
+
+1. Based on the above settings, this project provides the following MATLAB function for IEEE-style figures:
+
+   ```matlab
+   formatFigure(widthPercent, heightRatio, columnMode)
+   ```
+
+   The function performs the following operations:
+
+   - The reference width is determined by `columnMode`:
+     - `"single"`: single-column width;
+     - `"double"`: double-column width.
+     - The default mode is `"single"`.
+
+   - The figure width and height are respectively set to
+     ```text
+     x × 0.42175 cm × widthPercent / 100
+     ```
+     and
+     ```text
+     width × heightRatio
+     ```
+     where
+     ```text
+     x = 21  for single-column figures
+     x = 43  for double-column figures
+     ```
+
+   - If the corresponding arguments are omitted, the default values are
+     ```matlab
+     widthPercent = 100;
+     heightRatio  = 0.75;
+     columnMode   = "single";
+     ```
+
+   - The font size of all text objects, including axis labels and legends, is set to `8pt`.
+     - `8pt` is commonly used for IEEE single-column figures.
+
+   - The font configuration is:
+     - Chinese text: SimSun;
+     - English text: Times New Roman.
+
+     If `SimSun-TNR.ttf` is not installed, only Times New Roman is used. If the `fontname` command is unavailable, the font-setting operation is skipped.
+
+2. Example:
+
+   ```matlab
+   plot(x, y);
+   xlabel('Iteration, \it t');
+   ylabel('MSE [dB]');
+   legend('Location', 'northeast');
+
+   formatFigure;
+   ```
+
+3. Some commonly used figure layouts are:
+
+   - Two subfigures:
+     - Side by side:
+       ```matlab
+       formatFigure(50, 1)
+       ```
+     - Vertically stacked:
+       ```matlab
+       formatFigure(100, 0.5)
+       ```
+
+   - Three subfigures:
+     - Side by side:
+       ```matlab
+       formatFigure(100/3, 3/2)
+       ```
+     - Vertically stacked:
+       ```matlab
+       formatFigure(100, 1/3)
+       ```
+
+   - For a double-column figure, specify `"double"` as the third argument, for example:
+
+     ```matlab
+     formatFigure(100, 0.5, "double")
+     ```
+
+   - The `./Demonstration` folder also contains executable MATLAB examples and corresponding LaTeX layout examples.
+
+# Additional Notes
+
+1. When some text objects use font sizes smaller than `8pt`, for example when adjusting a figure under strict space limitations, directly saving the figure as an EPS file may cause the exported text to be reset to `8pt`.
+
+   In this case, the figure can be exported using
+
+   ```matlab
+   print(gcf, '-depsc', 'file.eps');
+   ```
+
+   or
+
+   ```matlab
+   exportgraphics( ...
+       gcf, ...
+       'file.pdf', ...
+       'ContentType', 'vector', ...
+       'BackgroundColor', 'none');
+   ```
+
+   to generate vector `.eps` or `.pdf` files.
+
+1. Mathematical symbols in axis labels should ideally use mathematical fonts. However, the MATLAB `\it` command only produces italic text and does not provide a true mathematical font. In addition, MATLAB does not allow the font family to be freely changed when the `latex` interpreter is used.
+
+   The `xlabel_Iteration_formatter` function provides a workaround:
+
+   - First, a normal text label is generated together with an invisible italic placeholder, for example:
+     ```matlab
+     'Iteration, {\color{white}\it t}'
+     ```
+
+   - The position of the `xlabel` can then be obtained from MATLAB.
+
+   - A mathematical symbol rendered using the `latex` interpreter is placed at the corresponding position.
+
+   - By adjusting the position of the mathematical symbol, it can be overlaid on the invisible placeholder, thereby producing a label containing both normal text and a true mathematical symbol.
+
+[^1]: [MATLAB Figure Properties](https://ww2.mathworks.cn/help/matlab/ref/matlab.ui.figure.html)
+
+[^2]: [How to Change Figure Size](https://ww2.mathworks.cn/matlabcentral/answers/173629-how-to-change-figure-size)
+
+[^3]: [MATLAB Axes LooseInset Property](https://undocumentedmatlab.com/articles/axes-looseinset-property)
+
+[^4]: [IEEEtran.cls](https://mirrors.ctan.org/macros/latex/contrib/IEEEtran/IEEEtran.cls)
+
+[^5]: [LaTeX Length Units](https://medemanabu.net/latex/length-units/)
